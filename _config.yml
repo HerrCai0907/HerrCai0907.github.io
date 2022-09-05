@@ -1,3 +1,9 @@
 remote_theme: pages-themes/hacker@v0.2.0
 plugins:
-- jekyll-remote-theme # add this line to the plugins list if you already have one
+  - jekyll-remote-theme # add this line to the plugins list if you already have one
+
+title: [蔡聪聪的快乐老家]
+description: [编程相关的技术文章]
+copyright: © 2021 - 2022 蔡聪聪 All Rights Reserved
+
+show_downloads: false
