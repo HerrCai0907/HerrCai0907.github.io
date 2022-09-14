@@ -14,19 +14,21 @@ rdtsc
 
 在使用中需要防止优化
 
-- 使用global变量, 避免编译器优化未使用的局部变量
+- 使用 global 变量, 避免编译器优化未使用的局部变量
 - 使用锁作为内存屏障
 - `__attribute__((noinline))` 防止内联
 
 ### google-perftools
 
--  ubuntu21安装 / 低版本可能需要从源码编译:  
+- ubuntu21 安装 / 低版本可能需要从源码编译:
+
 ```bash
 sudo apt install google-perftools
 # git clone https://github.com/gperftools/gperftools
 ```
 
--  使用  
+- 使用
+
 ```bash
 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libprofiler.so.0 CPUPROFILE=test.prof ./bin/vb_spectest ../tests/testsuite/
 google-pprof --svg ./bin/vb_spectest test.prof > test.svg
@@ -34,7 +36,8 @@ google-pprof --svg ./bin/vb_spectest test.prof > test.svg
 
 ### gprof - gcc 原生自带
 
--  使用  
+- 使用
+
 ```bash
 # for make project
 g++ -Og -g -pg ...
@@ -90,24 +93,28 @@ void test() {
 }
 ```
 
--  在函数内对象不可变, 传递const ref相当于传指针   
+- 在函数内对象不可变, 传递 const ref 相当于传指针
+
 ```c
-// g++ -S -O2 ./main.cpp -std=c++17 
+// g++ -S -O2 ./main.cpp -std=c++17
 __attribute__((noinline)) void foo_const(Test const &a) { a.nochange(1); }
 foo_const(a);
 ```
+
 ```assembly
 	sub	x0, x29, #40                    ; =40
 	bl	__Z9foo_constRK4Test            ; foo_const(Test const&)
 ```
 
--  在函数内需要操作传入对象的复制时, 直接使用对象可以同时处理左值右值   
+- 在函数内需要操作传入对象的复制时, 直接使用对象可以同时处理左值右值
+
 ```c
 void foo2(Test a) { a.change(1); }
 
 foo_copy_use(a);
 foo_copy_use(std::forward<Test>(a);
 ```
+
 ```assembly
 ; 传左值
 	add	x0, sp, #48                     ; =48
@@ -123,26 +130,30 @@ foo_copy_use(std::forward<Test>(a);
 	bl	__Z12foo_copy_use4Test
 ```
 
--  在函数内对象可变, 传递ref相当于传指针   
+- 在函数内对象可变, 传递 ref 相当于传指针
+
 ```c
 __attribute__((noinline)) void foo_change(Test &a) { a.change(1); }
 
 foo_change(a);
 ```
+
 ```assembly
 	sub	x0, x29, #40                    ; =40
 	bl	__Z10foo_changeR4Test
 ```
 
--  返回值优化 
-在完成ret调用后, 理论上应分别调用Test的移动构造和移动赋值. 但在arm64实际中汇编如下: 
-通过x8寄存器, 将返回值地址传入函数内部, 直接在对应地址构造
-ref: [cppreference: copy elision](https://contest-server.cs.uchicago.edu/ref/cppreference/en/cpp/language/copy_elision.html)
-ref: [Microsoft Docs: Overview of ARM64 ABI conventions](https://docs.microsoft.com/en-us/cpp/build/arm64-windows-abi-conventions?view=msvc-170)  
+- 返回值优化
+  在完成 ret 调用后, 理论上应分别调用 Test 的移动构造和移动赋值. 但在 arm64 实际中汇编如下:
+  通过 x8 寄存器, 将返回值地址传入函数内部, 直接在对应地址构造
+  ref: [cppreference: copy elision](https://contest-server.cs.uchicago.edu/ref/cppreference/en/cpp/language/copy_elision.html)
+  ref: [Microsoft Docs: Overview of ARM64 ABI conventions](https://docs.microsoft.com/en-us/cpp/build/arm64-windows-abi-conventions?view=msvc-170)
+
 ```assembly
   Test b = ret(a);
   b = ret(a);
 ```
+
 ```assembly
 __Z3retRK4Test:                         ; @_Z3retRK4Test
 	.cfi_startproc
@@ -154,7 +165,7 @@ __Z3retRK4Test:                         ; @_Z3retRK4Test
 ; Test b = ret(a);
 	add	x8, sp, #48                     ; =48
 	bl	__Z4retRK4Test
-	
+
 ; b = ret(a);
 	add	x8, sp, #8                      ; =8
 	bl	__Z4retRK4Test
@@ -162,18 +173,18 @@ __Z3retRK4Test:                         ; @_Z3retRK4Test
 	add	x1, sp, #8                      ; =8
 	bl	__ZN4TestaSEOS_
 ```
-> For types greater than 16 bytes, the caller shall reserve a block of memory of sufficient size and alignment to hold the result. The address of the memory block shall be passed as an additional argument to the function in x8. The callee may modify the result memory block at any point during the execution of the subroutine. The callee isn't required to preserve the value stored in x8.
 
+> For types greater than 16 bytes, the caller shall reserve a block of memory of sufficient size and alignment to hold the result. The address of the memory block shall be passed as an additional argument to the function in x8. The callee may modify the result memory block at any point during the execution of the subroutine. The callee isn't required to preserve the value stored in x8.
 
 ### view
 
 c++17 `string_view` 仅保存`string`对象头指针和长度, 适合用于传参
 
-C++20 `ranges::view` 更抽象的试图概念, 使用者需要保证view存续时间指向的数据一直存在
+C++20 `ranges::view` 更抽象的试图概念, 使用者需要保证 view 存续时间指向的数据一直存在
 
-### 为移动构造增加noexcept
+### 为移动构造增加 noexcept
 
-当使用stl容器储存该对象时, 若对象的移动构造函数声明不抛出异常, 容器扩容时会调用移动构造函数. 若移动构造可能抛出异常, 移动部分后将无法保证`push_back`等函数的异常安全性(老数据被破坏), stl会选择使用拷贝构造函数
+当使用 stl 容器储存该对象时, 若对象的移动构造函数声明不抛出异常, 容器扩容时会调用移动构造函数. 若移动构造可能抛出异常, 移动部分后将无法保证`push_back`等函数的异常安全性(老数据被破坏), stl 会选择使用拷贝构造函数
 
 ### 智能指针
 
@@ -187,15 +198,15 @@ C++20 `ranges::view` 更抽象的试图概念, 使用者需要保证view存续�
 
 ### mutex
 
-现代c++中普遍进行了优化, 普通mutex性能开销较低
+现代 c++中普遍进行了优化, 普通 mutex 性能开销较低
 
 ### atomic
 
-性能较mutex更高, 但推荐只在单一变量的同步中使用
+性能较 mutex 更高, 但推荐只在单一变量的同步中使用
 
 ### 浮点数
 
-编译器不会自动优化浮点数运算顺序(-O3不会, -Ofast中会), 需要手动合并
+编译器不会自动优化浮点数运算顺序(-O3 不会, -Ofast 中会), 需要手动合并
 
 ```c
 double a;
@@ -208,7 +219,7 @@ a = a * (1.0 * 2.0); // 好
 
 ### 编译期计算
 
-- constexpr: c++11, 14, 17, 20逐渐完善
+- constexpr: c++11, 14, 17, 20 逐渐完善
 - 模板元编程
 
 ## 多线程并发
@@ -240,7 +251,7 @@ int main(void) {
 100003fb4: c0 03 5f d6 	ret
 ```
 
-### CPU乱序执行
+### CPU 乱序执行
 
 ref: [memory ordering](https://en.wikipedia.org/wiki/Memory_ordering#cite_ref-mem_ord_pdf_7-0)
 
@@ -249,9 +260,9 @@ ref: [memory ordering](https://en.wikipedia.org/wiki/Memory_ordering#cite_ref-me
 for c++ `atomic`
 
 - memory_order_relaxed: only this operation's atomicity is guaranteed
-- memory_order_acquire: no reads or writes in the current thread can be reordered before this load. 保证在load完成后进行后续操作
-- memory_order_release: no reads or writes in the current thread can be reordered after this store. 保证store前所有操作已经完成
+- memory_order_acquire: no reads or writes in the current thread can be reordered before this load. 保证在 load 完成后进行后续操作
+- memory_order_release: no reads or writes in the current thread can be reordered after this store. 保证 store 前所有操作已经完成
 - memory_order_acq_rel: No memory reads or writes in the current thread can be reordered before or after this store.
 - memory_order_seq_cst (default): all threads observe all modifications in the same order
 
-ref: [对优化说不 - Linux中的Barrier](https://zhuanlan.zhihu.com/p/96001570)
+ref: [对优化说不 - Linux 中的 Barrier](https://zhuanlan.zhihu.com/p/96001570)
