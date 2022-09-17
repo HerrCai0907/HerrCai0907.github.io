@@ -6,7 +6,9 @@
 
 - [Assemblyscript](https://assemblyscript.org/)
   - [Compiler](https://github.com/AssemblyScript/assemblyscript)
-  - [Debug](https://github.com/HerrCai0907/assemblyscript-dbg)
+  - [Debuger](https://github.com/HerrCai0907/assemblyscript-dbg)
+- [OS](https://ipads.se.sjtu.edu.cn/mospi/) on going
+  - [lab](https://github.com/HerrCai0907/chcore-lib)
 
 ## Blogs
 
