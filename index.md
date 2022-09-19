@@ -24,6 +24,7 @@
 ### OS
 
 - [unix domain socket](docs/unix_domain_socket.md)
+- [Scheduler](docs/操作系统调度策略.md)
 
 ### Algorithm
 
