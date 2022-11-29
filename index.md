@@ -6,9 +6,9 @@
 
 - [Assemblyscript](https://assemblyscript.org/)
   - [Compiler](https://github.com/AssemblyScript/assemblyscript)
-  - [Debuger](https://github.com/HerrCai0907/assemblyscript-dbg)
-- [OS](https://ipads.se.sjtu.edu.cn/mospi/) on going
-  - [lab](https://github.com/HerrCai0907/chcore-lib)
+  - [Debugger](https://github.com/HerrCai0907/assemblyscript-dbg)
+- Compiler
+  - [write a compiler](https://github.com/HerrCai0907/walang) ONGOING
 
 ## Blogs
 
@@ -16,10 +16,12 @@
 
 - [c++性能优化](docs/c++性能优化.md)
 - [汇编中的立即数](docs/汇编中的立即数.md)
+- [工具链](docs/c++构建工具.md)
 
 ### AUTOSAR
 
 - [CAN 协议栈](docs/AUTOSAR_CAN.md)
+- [AP](docs/Adaptive_Autosar.md)
 
 ### OS
 
