@@ -30,12 +30,12 @@ timezone: Asia/Shanghai # see https://en.wikipedia.org/wiki/List_of_tz_database_
 author:
   type: # "person" (default), "organization"
   name: Congcong Cai
-  avatar: https://avatars.githubusercontent.com/u/77575210 # path or url of avatar image (square)
+  avatar: favicon.ico # path or url of avatar image (square)
   email: congongcai0907@163.com
-  zhihu: https://www.zhihu.com/people/cai-cong-cong-55 # "user_name" the last part of your profile url, e.g. https://www.zhihu.com/people/user_name
-  linkedin: https://www.linkedin.cn/incareer/in/ACoAACnUpi0BZtbpRnapsPWl4mEcFphHT5TC1DY # "user_name" the last part of your profile url, e.g. https://www.linkedin.com/in/user_name
-  github: https://github.com/HerrCai0907 # "user_name" the last part of your profile url, e.g. https://github.com/user_name
-  npm: https://www.npmjs.com/~congcongcai # "user_name" the last part of your profile url, e.g. https://www.npmjs.com/~user_name
+  zhihu: cai-cong-cong-55 # "user_name" the last part of your profile url, e.g. https://www.zhihu.com/people/user_name
+  linkedin: ACoAACnUpi0BZtbpRnapsPWl4mEcFphHT5TC1DY # "user_name" the last part of your profile url, e.g. https://www.linkedin.com/in/user_name
+  github: HerrCai0907 # "user_name" the last part of your profile url, e.g. https://github.com/user_name
+  npm: congcongcai # "user_name" the last part of your profile url, e.g. https://www.npmjs.com/~user_name
 
 ## => GitHub Repository (if the site is hosted by GitHub)
 ##############################

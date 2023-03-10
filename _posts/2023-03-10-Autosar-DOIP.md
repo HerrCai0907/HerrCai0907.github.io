@@ -1,6 +1,6 @@
 ---
 title: Autosar DoIP
-tags: Algorithm
+tags: Autosar
 ---
 
 # DoIP
