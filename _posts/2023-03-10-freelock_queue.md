@@ -5,9 +5,22 @@ tags: Algorithm
 
 # Free-Lock Queue
 
-## Single Producer and Single Consumer
+## Array-Based && Single-Producer-Single-Consumer
 
-### Algorithm
+### Data Structure
+
+The idea is we have a `ring_array` to store data, `read_index` pointing to the position which will be read and `write_index` pointing to the position which will be written.
+
+Both index are always increasing, so according to unsigned integer specification, we can ensure `0 <= write_index - read_index <= MAX_SIZE`.
+
+we can use `ring_array[read_index % MAX_SIZE]` to read data from Queue and `ring_array[write_index % MAX_SIZE]` to write data to Queue.
+
+- `write_index - read_index == 0` means queue is empty.
+- `write_index - read_index == MAX_SIZE` means queue is full.
+
+if index overflow, because `MAX_SIZE` is a power of 2, we can ensure `((MAX_INDEX_VALUE % MAX_SIZE) + 1) % MAX_SIZE == 0 % MAX_SIZE == 0`. So the index even when overflowing is continuous.
+
+### Example Code
 
 ```c
 #include <stdbool.h>
