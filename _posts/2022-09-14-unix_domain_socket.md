@@ -71,7 +71,7 @@ ss -x     # pear between socket
 
 - in `/proc/$pid/fd/` we can find the file descriptor and it linked source file.
 
-![image-20211014174501589](../images/prod-fd.png)
+![image-20211014174501589](images/prod-fd.png)
 
 ```c
 // read fd linked socket in c
@@ -89,7 +89,7 @@ int get_fd_file_name(int fd, char *file_name, size_t len) {
 
   we can read this file and get the socket path
 
-  ![image-20211014174808374](../images/prod-net.png)
+  ![image-20211014174808374](images/prod-net.png)
 
 ## How to listen unix domain socket
 

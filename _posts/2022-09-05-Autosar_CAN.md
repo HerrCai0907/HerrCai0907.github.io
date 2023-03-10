@@ -20,7 +20,7 @@ tags: Autosar
 
 ### CAN 协议栈架构
 
-![image.png](../images/AUTOSAR_CAN_1.png)
+![image.png](images/AUTOSAR_CAN_1.png)
 
 ### CAN 驱动
 
