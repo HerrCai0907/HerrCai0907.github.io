@@ -10,8 +10,14 @@
     - [性能优化](c++/2022-09-05-c++性能优化.md)
     - [构建工具](c++/2022-11-05-c++构建工具.md)
     - [代码质量](c++/2023-03-14-c++代码质量.md)
+    - [gtest 错误日志](c++/2024-03-18-gtest错误日志.md)
   - compiler
     - [立即数](compiler/2022-09-05-汇编中的立即数.md)
+    - [LLVM 的规范化](compiler/LLVM的规范化（Canonicalization）和目标无关（target-independence）.md)
+    - [循环优化](compiler/编译器的循环优化.md)
+    - [mem2reg](compiler/通用的mem2reg.md)
   - os
     - [unix domain socket](os/2022-09-14-unix_domain_socket.md)
     - [调度](os/2022-09-15-操作系统调度策略.md)
+  - runtime
+    - [gc 算法](runtime/gc.md)

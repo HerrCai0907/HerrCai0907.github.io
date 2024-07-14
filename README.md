@@ -17,6 +17,11 @@ I am a C++ and Webassembly developer in China.
 - I am proficient in Webassembly.
 - I am learning rust / go.
 
+### Link
+
+- email: congcongcaui0907@163.com
+- zhihu: https://www.zhihu.com/people/cai-cong-cong-55
+
 ## Open Source Contribution
 
 - [Assemblyscript](https://assemblyscript.org/)
