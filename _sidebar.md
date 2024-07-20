@@ -21,3 +21,5 @@
     - [调度](os/2022-09-15-操作系统调度策略.md)
   - runtime
     - [gc 算法](runtime/gc.md)
+  - wasm
+    - [迈向 wasm2.0](wasm/2024-07-14-迈向wasm2.md)
