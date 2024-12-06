@@ -1,30 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <title>Document</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="description" content="Description" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
-    />
-    <link
-      rel="stylesheet"
-      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
-    />
+    <meta charset="utf-8" />
+
+    <title>congcong's blog</title>
+    <meta name="author" content="congcong cai" />
   </head>
   <body>
-    <div id="app"></div>
+    <div style="display: flex; height: 100%">
+      <div id="left" style="height: 100%; background: rgba(132, 235, 6, 0.733)"></div>
+      <div id="right">welcome to congcong's blog!</div>
+    </div>
+    <script src="/resources/showdown.min.js"></script>
     <script>
-      window.$docsify = {
-        loadSidebar: true,
-        alias: {
-          // "/.*/_sidebar.md": "/_sidebar.md",
-        },
-      };
+      let converter = new showdown.Converter();
+      fetch("/index.md")
+        .then((response) => response.text())
+        .then((text) => {
+          document.getElementById("left").innerHTML = converter.makeHtml(text);
+        });
+
+      const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+      });
+      if (params.page) {
+        if (params.page.endsWith(".md")) {
+          fetch(params.page)
+            .then((response) => response.text())
+            .then((text) => {
+              document.getElementById("right").innerHTML = converter.makeHtml(text);
+            });
+        } else {
+          const name = params.page.slice(params.page.findIndex("/") + 1, params.page.findIndex("."));
+          document.getElementById("right").innerHTML = `<a href="/${params.page}">${params.page}</a>`;
+        }
+      }
     </script>
-    <!-- Docsify v4 -->
-    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   </body>
 </html>
