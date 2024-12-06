@@ -7,9 +7,9 @@
     <meta name="author" content="congcong cai" />
   </head>
   <body>
-    <div style="display: flex; height: 100%">
-      <div id="left" style="height: 100%; background: rgba(132, 235, 6, 0.733)"></div>
-      <div id="right">welcome to congcong's blog!</div>
+    <div style="width: 100%; height: 100%; position: relative">
+      <div id="left" style="width: 20%; height: 100%; position: absolute"></div>
+      <div id="right" style="left: 20%; height: 100%; position: absolute">welcome to congcong's blog!</div>
     </div>
     <script src="/resources/showdown.min.js"></script>
     <script>
@@ -30,9 +30,11 @@
             .then((text) => {
               document.getElementById("right").innerHTML = converter.makeHtml(text);
             });
-        } else {
-          const name = params.page.slice(params.page.findIndex("/") + 1, params.page.findIndex("."));
+        } else if (params.page.endsWith(".html")) {
+          const name = params.page.slice(params.page.indexOf("/") + 1, params.page.lastIndexOf("."));
           document.getElementById("right").innerHTML = `<a href="/${params.page}">${params.page}</a>`;
+        } else {
+          document.getElementById("right").innerHTML = "<h1>404</h1>";
         }
       }
     </script>
