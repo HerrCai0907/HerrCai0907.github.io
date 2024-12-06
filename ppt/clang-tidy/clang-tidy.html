@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>introduction of clang-tidy</title>
+    <meta name="author" content="congcong cai" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/dist/reset.css" />
+    <link rel="stylesheet" href="../static/dist/reveal.css" />
+    <link rel="stylesheet" href="../static/dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="../static/plugin/highlight/monokai.css" />
+    <style></style>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>introduction of clang-tidy</h2>
+          <p>congcong.cai@bmw.com</p>
+        </section>
+        <!-- introduce -->
+        <section>
+          <h2>4 kinds of program analysis</h2>
+          <table style="font-size: x-large">
+            <thead>
+              <tr>
+                <th style="text-align: center; vertical-align: middle"></th>
+                <th style="text-align: center; vertical-align: middle">Diagnostic</th>
+                <th style="text-align: center; vertical-align: middle">Linter</th>
+                <th style="text-align: center; vertical-align: middle">Static Analyzer</th>
+                <th style="text-align: center; vertical-align: middle">Dynamic Analyzer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-align: center; vertical-align: middle">Tools</td>
+                <td style="text-align: center; vertical-align: middle">gcc, clang</td>
+                <td style="text-align: center; vertical-align: middle">clang-tidy, cppchecker, coverity, klocwork</td>
+                <td style="text-align: center; vertical-align: middle">clang-static-analyzer</td>
+                <td style="text-align: center; vertical-align: middle">sanitizer, valgrind</td>
+              </tr>
+              <tr>
+                <td style="text-align: center; vertical-align: middle">False Positives</td>
+                <td style="text-align: center; vertical-align: middle">low</td>
+                <td style="text-align: center; vertical-align: middle">high</td>
+                <td style="text-align: center; vertical-align: middle">low</td>
+                <td style="text-align: center; vertical-align: middle">low</td>
+              </tr>
+              <tr>
+                <td style="text-align: center; vertical-align: middle">False Negatives</td>
+                <td style="text-align: center; vertical-align: middle">low</td>
+                <td style="text-align: center; vertical-align: middle">low</td>
+                <td style="text-align: center; vertical-align: middle">high</td>
+                <td style="text-align: center; vertical-align: middle">high</td>
+              </tr>
+              <tr>
+                <td style="text-align: center; vertical-align: middle">Implement</td>
+                <td style="text-align: center; vertical-align: middle">In Compiler</td>
+                <td style="text-align: center; vertical-align: middle">Text/AST Matcher</td>
+                <td style="text-align: center; vertical-align: middle">Symbolic Execution</td>
+                <td style="text-align: center; vertical-align: middle">Instrumentation and Hook</td>
+              </tr>
+              <tr>
+                <td style="text-align: center; vertical-align: middle">Affects</td>
+                <td style="text-align: center; vertical-align: middle">None</td>
+                <td style="text-align: center; vertical-align: middle">Run part of compilation</td>
+                <td style="text-align: center; vertical-align: middle">Slow analysis speed</td>
+                <td style="text-align: center; vertical-align: middle">
+                  Instrumentation during compilation, Execution time overhead
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <!-- clang compilation process (frontend) -->
+        <section>
+          <h2>how clang work</h2>
+          <p>source code</p>
+          <pre data-id="code-animation"><code class="c++" data-trim data-line-numbers="" style="font-size: medium;">
+            #define EQ(a, b) a == b
+            bool cmp(unsigned a) { return EQ(a, -1); }
+          </code></pre>
+
+          <p style="color: chocolate; font-size: medium">clang++ -E demo.cpp</p>
+
+          <p>after preprocess:</p>
+          <pre data-id="code-animation"><code class="c++" data-trim data-line-numbers="" style="font-size: medium;">
+            bool cmp(unsigned a) { return a == -1; }
+          </code></pre>
+        </section>
+        <section>
+          <h2>how clang work</h2>
+          <pre data-id="code-animation"><code class="c++" data-trim data-line-numbers="" style="font-size: medium;">
+            bool cmp(unsigned a) { return a == -1; }
+          </code></pre>
+          <p style="color: chocolate; font-size: medium">clang++ -Xclang -ast-dump demo.cpp</p>
+          <p>AST &#40;abstract syntax tree&#41;</p>
+          <pre data-id="code-animation"><code class="c++" data-trim data-line-numbers="" style="font-size: medium;">
+            `-FunctionDecl cmp 'bool (unsigned int)'
+              |-ParmVarDecl 0x15b8a4c08 used a 'unsigned int'
+              `-CompoundStmt
+                `-ReturnStmt
+                  `-BinaryOperator 'bool' '=='
+                    |-ImplicitCastExpr 'unsigned int' &lt;LValueToRValue&gt;
+                    | `-DeclRefExpr 'unsigned int' lvalue ParmVar 0x15b8a4c08 'a' 'unsigned int'
+                    `-ImplicitCastExpr 'unsigned int' &lt;IntegralCast&gt;
+                      `-UnaryOperator 'int' prefix '-'
+                        `-IntegerLiteral 'int' 1
+          </code></pre>
+        </section>
+        <section>
+          <h2>AST Matcher</h2>
+          <ul>
+            <li>powerful tool to match the AST nodes with declaration style language</li>
+            <li>
+              example to detect comparison between unsigned integer with negative number
+              <pre
+                data-id="code-animation"
+              ><code class="c++" data-trim data-line-numbers="1-2,10|3|4-9"  style="font-size: medium;">
+                binaryOperator(
+                  isComparisonOperator(),
+                  hasEitherOperand(hasType(isUnsignedInteger())),
+                  hasEitherOperand(ignoringImplicit(
+                    unaryOperator(
+                      hasOperatorName("-"),
+                      hasUnaryOperand(integerLiteral())
+                    )
+                  ))
+                )
+            </code></pre>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h2>write clang-tidy check</h2>
+          <ul>
+            <li>
+              <a href="https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clang-tidy/add_new_check.py"
+                >python script</a
+              >
+              will help you handle all things.
+            </li>
+            <li>
+              <pre
+                data-id="code-animation"
+              ><code class="c++" data-trim data-line-numbers=""  style="font-size: medium;">
+                python3 clang-tools-extra/clang-tidy/add_new_check.py \
+                    bugprone avoid-unsigned-negative-int-cmp
+              </code></pre>
+            </li>
+          </ul>
+        </section>
+        <section>
+          update the ast matcher and diagnostic emitter<br />
+          <pre
+            data-id="code-animation"
+          ><code class="c++" data-trim data-line-numbers="1-2,7-9|11-14"  style="font-size: medium;">
+            void AvoidUnsignedNegativeIntCmpCheck::registerMatchers(MatchFinder *Finder) {
+              Finder->addMatcher(
+                  binaryOperator(
+                      isComparisonOperator(), hasEitherOperand(hasType(isInteger())),
+                      hasEitherOperand(ignoringImplicit(unaryOperator(
+                          hasOperatorName("-"), hasUnaryOperand(integerLiteral())))))
+                      .bind("cmp"),
+                  this);
+            }
+
+            void AvoidUnsignedNegativeIntCmpCheck::check(const MatchFinder::MatchResult &Result) {
+              const auto *BO = Result.Nodes.getNodeAs&lt;BinaryOperator&gt;("cmp");
+              diag(BO->getBeginLoc(), "avoid comparison between unsigned integer and negative value") &lt;&lt; BO->getSourceRange();
+            }
+          </code></pre>
+        </section>
+        <section>
+          running clang-tidy with custom checks,<br />
+          you will get the following warning. 🎉<br />
+          <pre data-id="code-animation"><code class="shell" data-trim data-line-numbers=""  style="font-size: medium;">
+            demo.cpp:2:34: warning: avoid comparison between unsigned integer and negative value
+                  2 | bool cmp(unsigned a) { return EQ(a, -1); }
+                                                    ^
+          </code></pre>
+        </section>
+        <!-- end -->
+        <section>
+          <p>can ast matcher find the divide zero exception?</p>
+          <pre data-id="code-animation"><code class="c++" data-trim data-line-numbers=""  style="font-size: medium;">
+            int div(int a,int b) { return a / b;}
+            void foo(int a, int b) {
+              if (a == b) div(a, a - b);
+            }
+          </code></pre>
+        </section>
+        <section>
+          <p style="font-size: larger">solution: symbolic execution</p>
+          <p>see next issue</p>
+        </section>
+      </div>
+    </div>
+    <script src="../static/dist/reveal.js"></script>
+    <script src="../static/plugin/zoom/zoom.js"></script>
+    <script src="../static/plugin/notes/notes.js"></script>
+    <script src="../static/plugin/search/search.js"></script>
+    <script src="../static/plugin/markdown/markdown.js"></script>
+    <script src="../static/plugin/highlight/highlight.js"></script>
+    <script>
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        center: true,
+        hash: true,
+        plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight],
+      });
+    </script>
+  </body>
+</html>

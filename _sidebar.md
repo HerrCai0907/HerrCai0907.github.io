@@ -11,6 +11,7 @@
     - [构建工具](c++/2022-11-05-c++构建工具.md)
     - [代码质量](c++/2023-03-14-c++代码质量.md)
     - [gtest 错误日志](c++/2024-03-18-gtest错误日志.md)
+    - [clang-tidy introduction](c++/2024-12-06-clang-tidy-intro.md)
   - compiler
     - [立即数](compiler/2022-09-05-汇编中的立即数.md)
     - [LLVM 的规范化](compiler/LLVM的规范化（Canonicalization）和目标无关（target-independence）.md)
