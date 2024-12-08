@@ -2,6 +2,7 @@
 
 - [密码学](/index.html?page=algorithm/2022-09-17-密码学.md)
 - [无锁队列](/index.html?page=algorithm/2023-03-10-freelock_queue.md)
+- [工作窃取式调度](/index.html?page=algorithm/2024-12-08-stealing-scheduler.md)
 
 ## autosar
 
