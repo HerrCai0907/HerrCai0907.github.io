@@ -5,4 +5,4 @@
 ## References
 
 - [cilk](https://zh.wikipedia.org/zh-sg/Cilk)
-- [Scheduling Multithreaded Computations by Work Stealing](papers/Scheduling Multithreaded Computations by Work Stealing.pdf)
+- [Scheduling Multithreaded Computations by Work Stealing](<papers/Scheduling Multithreaded Computations by Work Stealing.pdf>)
