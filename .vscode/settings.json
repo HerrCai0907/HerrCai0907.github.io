@@ -1,4 +1,4 @@
 {
   "editor.formatOnSave": true,
-  "cSpell.words": ["autosar", "gtest"]
+  "cSpell.words": ["autosar", "gtest", "SFINAE"]
 }
