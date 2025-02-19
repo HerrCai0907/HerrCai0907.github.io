@@ -20,6 +20,7 @@
 
 ## compiler
 
+- [最后分支记录](/index.html?page=compiler/2025-02-19-last-branch-record.md)
 - [立即数](/index.html?page=compiler/2022-09-05-汇编中的立即数.md)
 - [LLVM 的规范化](/index.html?page=compiler/LLVM的规范化（Canonicalization）和目标无关（target-independence）.md)
 - [循环优化](/index.html?page=compiler/编译器的循环优化.md)
