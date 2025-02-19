@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -11,13 +11,13 @@
       <div id="left" style="width: 20%; height: 100%; position: absolute"></div>
       <div id="right" style="left: 20%; height: 100%; position: absolute">welcome to congcong's blog!</div>
     </div>
-    <script src="/resources/showdown.min.js"></script>
+    <script src="/resources/markdown-it.min.js"></script>
     <script>
-      let converter = new showdown.Converter();
+      const md = markdownit();
       fetch("/index.md")
         .then((response) => response.text())
         .then((text) => {
-          document.getElementById("left").innerHTML = converter.makeHtml(text);
+          document.getElementById("left").innerHTML = md.render(text);
         });
 
       const params = new Proxy(new URLSearchParams(window.location.search), {
@@ -28,7 +28,7 @@
           fetch(params.page)
             .then((response) => response.text())
             .then((text) => {
-              document.getElementById("right").innerHTML = converter.makeHtml(text);
+              document.getElementById("right").innerHTML = md.render(text);
             });
         } else if (params.page.endsWith(".html")) {
           const name = params.page.slice(params.page.indexOf("/") + 1, params.page.lastIndexOf("."));
