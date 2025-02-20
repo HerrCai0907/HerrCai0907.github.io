@@ -1,37 +1,47 @@
 mem2reg 是一种SSA的构建方式，将非ssa的内存变量转化为ssa值的形式。
 在指令层面，mem2reg将对内存的load和store指令转化为对ssa值的直接使用。
+
 ## 作用
 
 1. 写编译前端时不需要考虑SSA
 2. 删除内存读写操作
 3. 简化程序结构
+
 ## 原理
 
-- 对于load指令，使用数据流分析（iterated dominance frontier)，找到所有对应内存位置的store指令
+- 对于load指令，使用数据流分析 (iterated dominance frontier)，找到所有对应内存位置的store指令
 - 将这些来自不同分支的store指令的值，在load指令所在基本块中入口处整合成v
 - 将load指令简化为v
 
-![image.png](https://cdn.nlark.com/yuque/0/2024/png/26298631/1713611388025-ea02764f-d382-4f49-b25d-c318452bf287.png#averageHue=%23f6f6f6&clientId=ub0c98a2e-f3e6-4&from=paste&height=221&id=u0d3922b8&originHeight=562&originWidth=1102&originalType=binary&ratio=2&rotation=0&showTitle=false&size=198382&status=done&style=none&taskId=u685004bc-9bad-4537-ab48-930b947492f&title=&width=433)![image.png](https://cdn.nlark.com/yuque/0/2024/png/26298631/1713611369221-869ec7fd-859d-4ebb-b7d5-bc1ba80714de.png#averageHue=%23f5f5f5&clientId=ub0c98a2e-f3e6-4&from=paste&height=281&id=vPgE7&originHeight=562&originWidth=768&originalType=binary&ratio=2&rotation=0&showTitle=false&size=78250&status=done&style=none&taskId=u616d881b-3d7f-405f-a59b-cb7b231c7eb&title=&width=384)
+![](compiler/mem2reg-1.png)![](compiler/mem2reg-2.png)
+
 ## 抽象接口
+
 对于mlir中，mem2reg需要处理未知的用户自定义指令，因此需要定义一组抽象接口用于定义指令的行为
+
 ### 可追踪的“内存”
+
 “内存”不仅仅局限于RAM，而是可以为任意支持load和store语义的存储单元。
 对于mem2reg，内存必需满足以下条件
 
-1. 单一值（SSA基本要求）
-2. 固定类型（SSA基本要求）
+1. 单一值 (SSA基本要求)
+2. 固定类型 (SSA基本要求)
 3. 不可逃逸出分析的作用域
-4. 仅通过特定句柄访问（无法通过指针运算等其他方式获得该内存地址）
+4. 仅通过特定句柄访问 (无法通过指针运算等其他方式获得该内存地址)
+
 ### 内存分配指令的接口
 
 1. 返回所有可以进行mem2reg的内存块
 2. 返回内存块中的默认值
+
 ### 内存使用指令的接口
 
 1. 返回该指令在mem2reg后能否被移除
-2. 返回移除方式（删除、替换等）
+2. 返回移除方式 (删除、替换等)
 3. 该指令是否有load语义
 4. 该指令是否有stroe语义
 5. 该指令将会在对应的内存中store什么值
+
 ## 相关优化
+
 SROA (scalar replacement of aggregates)：将聚合类型的内存分配指令拆分成针对每个成员的单独的分配指令，以便于mem2reg将每个成员单独进行ssa转化。
